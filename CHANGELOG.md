@@ -1,4 +1,4 @@
-## 0.4.0 - Not released Yet
+## 0.4.0
 
 - #791 Fix double escaping of problem title in list view.(@felixbuenemann)
 - #790 Fix favicon location.(@felixbuenemann)
@@ -8,6 +8,9 @@
 - Drop ruby support for versions 1.9.x, and 2.0.x.(@arthurnn)
 - #773 Only leave GitHub issue tracker on vanila errbit, as the others could be added just using the plugin.(@arthurnn)
 - #768 Update to Mongoid 4.0 and rails to 4.0 (@arthurnn)
+- #810 Use ENV for all configuration (@stevecrozz)
+- Improve and document the errbit_plugin interface for issue trackers
+  (@stevecrozz, @arthurnn)
 
 ## 0.3.0
 
