@@ -316,6 +316,7 @@ GEM
       rspec-mocks (~> 3.1.0)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.2)
+    ruby-prof (0.15.8)
     rushover (0.3.0)
       json
       rest-client
@@ -445,6 +446,7 @@ DEPENDENCIES
   rspec-activemodel-mocks
   rspec-its
   rspec-rails (~> 3.0)
+  ruby-prof
   rushover
   sass-rails
   test-unit
