@@ -236,11 +236,22 @@ Devise.setup do |config|
   # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
 
   if Errbit::Config.github_authentication || Rails.env.test?
+    github_options = {
+      :scope => Errbit::Config.github_access_scope.join(','),
+      :skip_info => true
+    }
+    if Errbit::Config.github_url != 'https://github.com'
+      github_options[:client_options] = {
+        :site => "#{Errbit::Config.github_url}/api/v3",
+        :authorize_url => "#{Errbit::Config.github_url}/login/oauth/authorize",
+        :token_url => "#{Errbit::Config.github_url}/login/oauth/access_token",
+      }
+    end
+
     config.omniauth :github,
       Errbit::Config.github_client_id,
       Errbit::Config.github_secret,
-      :scope => Errbit::Config.github_access_scope.join(','),
-      :skip_info => true
+      github_options
   end
 
   # ==> Warden configuration
