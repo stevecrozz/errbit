@@ -60,3 +60,25 @@ Errbit::Config = Configurator.run({
 
   devise_modules:            ['DEVISE_MODULES'],
 })
+
+Errbit::Config.define_singleton_method(:github_enterprise?) do
+  github_url != 'https://github.com'
+end
+
+Errbit::Config.define_singleton_method(:github_site_title) do
+  'GitHub'.tap do |title|
+    title << ' Enterprise' if github_enterprise?
+  end
+end
+
+Errbit::Config.define_singleton_method(:github_api_url) do
+  github_enterprise? ? "#{github_url}/api/v3" : "api.github.com"
+end
+
+Errbit::Config.define_singleton_method(:github_authorize_url) do
+  "#{github_url}/login/oauth/authorize"
+end
+
+Errbit::Config.define_singleton_method(:github_token_url) do
+  "#{github_url}/login/oauth/access_token"
+end
