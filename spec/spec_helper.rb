@@ -59,6 +59,3 @@ RSpec.configure do |config|
 end
 
 OmniAuth.config.test_mode = true
-
-# Prevent Test::Unit's autorunner from running
-Test::Unit.run = true if defined?(Test::Unit) && Test::Unit.respond_to?(:run=)

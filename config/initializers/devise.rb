@@ -238,15 +238,13 @@ Devise.setup do |config|
   if Errbit::Config.github_authentication || Rails.env.test?
     github_options = {
       :scope => Errbit::Config.github_access_scope.join(','),
-      :skip_info => true
-    }
-    if Errbit::Config.github_enterprise?
-      github_options[:client_options] = {
+      :skip_info => true,
+      :client_options => {
         :site => Errbit::Config.github_api_url,
-        :authorize_url => Errbit::Config.github_authorize_url,
-        :token_url => Errbit::Config.github_token_url,
+        :authorize_url => "#{Errbit::Config.github_url}/login/oauth/authorize",
+        :token_url => "#{Errbit::Config.github_url}/login/oauth/access_token"
       }
-    end
+    }
 
     config.omniauth :github,
       Errbit::Config.github_client_id,

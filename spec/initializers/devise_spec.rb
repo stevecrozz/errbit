@@ -4,20 +4,26 @@ describe 'initializers/devise' do
   end
 
   after do
-    ActionMailer::Base.delivery_method = :test
+    # reset to the defaults
+    load_initializer
   end
 
   describe 'omniauth github' do
     it 'sets the client options correctly for the default github_url' do
-      allow(Errbit::Config).to receive(:github_url).and_return('https://github.com')
       load_initializer
 
       options = Devise.omniauth_configs[:github].options
-      expect(options).not_to have_key(:client_options)
+      expect(options).to have_key(:client_options)
+      expect(options[:client_options]).to eq({
+        site: 'https://api.github.com',
+        authorize_url: 'https://github.com/login/oauth/authorize',
+        token_url: 'https://github.com/login/oauth/access_token',
+      })
     end
 
     it 'sets the client options correctly for the a GitHub Enterprise github_url' do
       allow(Errbit::Config).to receive(:github_url).and_return('https://github.example.com')
+      allow(Errbit::Config).to receive(:github_api_url).and_return('https://github.example.com/api/v3')
       load_initializer
 
       options = Devise.omniauth_configs[:github].options
