@@ -72,7 +72,7 @@ Errbit::Config.define_singleton_method(:github_site_title) do
 end
 
 Errbit::Config.define_singleton_method(:github_api_url) do
-  github_enterprise? ? "#{github_url}/api/v3" : "api.github.com"
+  github_enterprise? ? "#{github_url}/api/v3" : "https://api.github.com"
 end
 
 Errbit::Config.define_singleton_method(:github_authorize_url) do
