@@ -240,11 +240,11 @@ Devise.setup do |config|
       :scope => Errbit::Config.github_access_scope.join(','),
       :skip_info => true
     }
-    if Errbit::Config.github_url != 'https://github.com'
+    if Errbit::Config.github_enterprise?
       github_options[:client_options] = {
-        :site => "#{Errbit::Config.github_url}/api/v3",
-        :authorize_url => "#{Errbit::Config.github_url}/login/oauth/authorize",
-        :token_url => "#{Errbit::Config.github_url}/login/oauth/access_token",
+        :site => Errbit::Config.github_api_url,
+        :authorize_url => Errbit::Config.github_authorize_url,
+        :token_url => Errbit::Config.github_token_url,
       }
     end
 
