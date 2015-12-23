@@ -1,5 +1,8 @@
 .bundle
-.env
+/.env.development
+/.env.test
+/.env.local
+/.env
 db/*.sqlite3
 log/*.log
 tmp/**/*

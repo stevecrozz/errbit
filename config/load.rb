@@ -1,4 +1,7 @@
-# load default ENV values (without overwriting any existing value)
+# load .env.local .env.#{Rails.env} and .env
+require 'dotenv/rails'
+
+# load .env.default (without overwriting any existing value)
 Dotenv.load('.env.default')
 
 require_relative '../lib/configurator'
