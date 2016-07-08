@@ -1,0 +1,64 @@
+<h1 id="deploy-with-capistrano">Deploy with Capistrano</h1>
+<p>These instructions should be good enough to get you started deploying
+capistrano with Errbit. More than likely, you’ll have to adjust some
+things to suit your needs, so you should understand how to use
+capistrano before you continue.</p>
+
+<h2 id="clone-and-prepare-the-source-code-repository">Clone and prepare the source code repository</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>git clone git@github.com:errbit/errbit.git
+<span class="nb">cd </span>errbit
+
+<span class="c"># Create and edit deploy.rb</span>
+cp config/deploy.example.rb config/deploy.rb
+<span class="nv">$EDITOR</span> config/deploy.rb
+
+<span class="c"># Create and edit production.rb</span>
+cp config/deploy/production.example.rb config/deploy/production.rb
+<span class="nv">$EDITOR</span> config/deploy/production.rb
+
+<span class="c"># Check to make sure configs exist</span>
+bundle <span class="nb">exec </span>cap production deploy:check
+
+<span class="c"># Create the configs yourself, or run errbit:setup to upload the</span>
+<span class="c"># defaults</span>
+bundle <span class="nb">exec </span>cap production errbit:setup
+
+<span class="c"># Deploy</span>
+bundle <span class="nb">exec </span>cap production deploy
+
+<span class="c"># Setup the remote DB if you haven't already</span>
+bundle <span class="nb">exec </span>cap production db:setup
+</code></pre>
+</div>
+
+<h2 id="static-assets">Static Assets</h2>
+<p>For a deployment of any real size, you’ll probably want to set up a web
+server for efficiently serving static assets. If you choose to go this
+route, just map all requests for /assets/.* to
+/deploy/path/shared/public/assets</p>
+
+<h2 id="starting-errbit">Starting Errbit</h2>
+<p>Errbit comes with some capistrano tasks to manage running Errbit under
+unicorn.
+To start Errbit, you can run:
+<code class="highlighter-rouge">bash
+bundle exec cap production unicorn:start
+</code></p>
+
+<p>Supervising and monitoring Errbit is beyond the scope of this
+documentation.</p>
+
+<h3 id="rbenv-support">rbenv support</h3>
+
+<p>Pass <code class="highlighter-rouge">rbenv</code> environment when running <code class="highlighter-rouge">cap</code> to use rbenv. See
+<a href="https://github.com/capistrano/rbenv">capistrano/rbenv</a> for more
+information.</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nv">rbenv</span><span class="o">=</span>1 bundle <span class="nb">exec </span>cap production deploy
+</code></pre>
+</div>
+
+<h2 id="schedule-recurring-tasks">Schedule recurring tasks</h2>
+<p>You may want to periodically clear resolved errors to free up space.
+Schedule <code class="highlighter-rouge">rake errbit:db:clear_resolved</code> to run every day or so.</p>

@@ -1,0 +1,47 @@
+<h1 id="deploy-hooks">Deploy Hooks</h1>
+<p>Errbit can track your application deploys if you send a special message to
+Errbit whenever you deploy.</p>
+
+<h2 id="from-heroku">From heroku</h2>
+<p>If you’re using heroku, you can add a deploy hook like this:
+~~~bash
+$ heroku addons:add deployhooks:http \
+  –url=http://myerrbit.com/deploys.txt
+~~~</p>
+
+<h2 id="from-the-airbrake-gem-using-the-rake-task">From the airbrake gem using the rake task</h2>
+<p>The airbrake gem comes with a nice rake task for sending deploy hooks. Assuming
+you already have it configured, you can send hooks like this:
+~~~bash
+$ TO=env-name \
+  REVISION=rev-string \
+  REPO=repo-string \
+  USER=user-string \
+  rake airbrake:deploy
+~~~</p>
+
+<h2 id="from-the-airbrake-gem-using-capistrano-3">From the airbrake gem using capistrano 3</h2>
+<p>In your application’s Capfile, insert:
+~~~ruby
+require ‘airbrake/capistrano3’
+~~~</p>
+
+<p>This will add a new capistrano task named <code class="highlighter-rouge">airbrake:deploy</code> which ends up
+calling <code class="highlighter-rouge">rake airbrake:deploy</code> with the values from your capistrano config.
+You may need to set the <code class="highlighter-rouge">API_KEY</code> environment variable on the target
+application.</p>
+
+<h2 id="from-curl">From curl</h2>
+<p>Errbit supports sending a message along with your deploy hook. The airbrake gem
+doesn’t support this, but you can easily send it along yourself. Here’s an
+example using cURL:
+~~~bash
+$ curl https://myerrbit.com/deploys.txt \
+  –data “api_key=406e4374bf508ad0d7732c2d35ed380d” \
+  –data “app_id=cb71ca8429732ba86b90d57c” \
+  –data “deploy[local_username]=user-string” \
+  –data “deploy[rails_env]=env-name” \
+  –data “deploy[scm_repository]=repo-string” \
+  –data “deploy[scm_revision]=rev-string” \
+  –data “deploy[message]=my-message”
+~~~</p>

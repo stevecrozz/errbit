@@ -1,0 +1,84 @@
+<h1 id="deploy-to-heroku">Deploy to Heroku</h1>
+
+<h2 id="the-easy-way">The Easy Way</h2>
+
+<p>If you just want to get started with Errbit and you’re not sure how to proceed,
+you can use this deploy button to get a basic deployment running on Heroku.</p>
+
+<p><a href="https://heroku.com/deploy?template=https://github.com/errbit/errbit/tree/master"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" /></a></p>
+
+<h2 id="the-hard-way">The Hard Way</h2>
+
+<p>We designed Errbit to work well with Heroku. These instructions should result
+in a working deploy, but you should modify them to suit your needs:</p>
+
+<h3 id="clone-and-prepare-the-source-code-repository">Clone and prepare the source code repository</h3>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>git clone git@github.com:errbit/errbit.git
+<span class="nb">cd </span>errbit
+</code></pre>
+</div>
+
+<ul>
+  <li>Update <code class="highlighter-rouge">db/seeds.rb</code> with admin credentials for your initial login</li>
+</ul>
+
+<p>Commit the results:
+<code class="highlighter-rouge">bash
+git commit -m "Update db/seeds.rb with initial login"
+</code></p>
+
+<h3 id="install-the-heroku-toolbelt">Install the heroku toolbelt</h3>
+<p><a href="https://toolbelt.heroku.com/">toolbelt.heroku.com</a></p>
+
+<h3 id="create-an-app-on-heroku-and-push-the-source-code">Create an app on Heroku and push the source code</h3>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>heroku apps:create
+heroku addons:create mongolab:sandbox
+heroku addons:create sendgrid:starter
+heroku config:set <span class="nv">GEMFILE_RUBY_VERSION</span><span class="o">=</span>2.2.3
+heroku config:set <span class="nv">SECRET_KEY_BASE</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>bundle <span class="nb">exec </span>rake secret<span class="k">)</span><span class="s2">"</span>
+heroku config:set <span class="nv">ERRBIT_HOST</span><span class="o">=</span>some-hostname.example.com
+heroku config:set <span class="nv">ERRBIT_EMAIL_FROM</span><span class="o">=</span>example@example.com
+heroku config:set <span class="nv">EMAIL_DELIVERY_METHOD</span><span class="o">=</span>smtp <span class="nv">SMTP_SERVER</span><span class="o">=</span>smtp.sendgrid.net
+git push heroku master
+</code></pre>
+</div>
+
+<h3 id="prepare-the-db">Prepare the DB</h3>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>heroku run rake errbit:bootstrap
+</code></pre>
+</div>
+
+<h3 id="schedule-recurring-tasks">Schedule recurring tasks</h3>
+<p>You may want to periodically clear resolved errors to free up space. For that
+you have a few options:</p>
+
+<p>Option 1. With the heroku-scheduler add-on (replacement for cron):</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Install the heroku scheduler add-on</span>
+heroku addons:create scheduler:standard
+
+<span class="c"># Go open the dashboard to schedule the job.  You should use</span>
+<span class="c"># 'rake errbit:db:clear_resolved' as the task command, and schedule it</span>
+<span class="c"># at whatever frequency you like (once/day should work great).</span>
+heroku addons:create scheduler
+</code></pre>
+</div>
+
+<p>Option 2. With the cron add-on:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Install the heroku cron addon, to clear resolved errors daily:</span>
+heroku addons:create cron:daily
+</code></pre>
+</div>
+
+<p>Option 3. Clear resolved errors manually:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>heroku run rake errbit:db:clear_resolved
+</code></pre>
+</div>
+
+<h3 id="add-the-deployment-hook">Add the deployment hook</h3>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>heroku addons:create deployhooks:http --url<span class="o">=</span><span class="s2">"http://YOUR_ERRBIT_HOST/deploys.txt?api_key=YOUR_API_KEY"</span>
+</code></pre>
+</div>

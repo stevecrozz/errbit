@@ -1,0 +1,120 @@
+<h1 id="deploy-with-capistrano">Deploy with Capistrano</h1>
+<p>These instructions should be good enough to get you started deploying
+capistrano with Errbit. More than likely, you’ll have to adjust some
+things to suit your needs, so you should understand how to use
+capistrano before you continue.</p>
+
+<h2 id="clone-and-prepare-the-source-code-repository">Clone and prepare the source code repository</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>git clone git@github.com:errbit/errbit.git
+<span class="nb">cd </span>errbit
+
+<span class="c"># Create and edit deploy.rb</span>
+cp config/deploy.example.rb config/deploy.rb
+<span class="nv">$EDITOR</span> config/deploy.rb
+
+<span class="c"># Create and edit production.rb</span>
+cp config/deploy/production.example.rb config/deploy/production.rb
+<span class="nv">$EDITOR</span> config/deploy/production.rb
+
+<span class="c"># Check to make sure configs exist</span>
+bundle <span class="nb">exec </span>cap production deploy:check
+
+<span class="c"># Create the configs yourself, or run errbit:setup to upload the</span>
+<span class="c"># defaults</span>
+bundle <span class="nb">exec </span>cap production errbit:setup
+
+<span class="c"># Deploy</span>
+bundle <span class="nb">exec </span>cap production deploy
+
+<span class="c"># Setup the remote DB if you haven't already</span>
+bundle <span class="nb">exec </span>cap production db:setup
+</code></pre>
+</div>
+
+<h2 id="static-assets">Static Assets</h2>
+<p>For a deployment of any real size, you’ll probably want to set up a web
+server for efficiently serving static assets. If you choose to go this
+route, just map all requests for /assets/.* to
+/deploy/path/shared/public/assets</p>
+
+<h2 id="starting-errbit">Starting Errbit</h2>
+<p>Errbit comes with some capistrano tasks to manage running Errbit under
+puma.
+To start Errbit, you can run:
+<code class="highlighter-rouge">bash
+bundle exec cap production puma:start
+</code></p>
+
+<h2 id="status-of-errbit">Status of Errbit</h2>
+<p>To check if the Errbit server is running you can run:
+<code class="highlighter-rouge">bash
+bundle exec cap production puma:status
+</code></p>
+
+<h2 id="stopping-errbit">Stopping Errbit</h2>
+<p>To stop Errbit run</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>bundle <span class="nb">exec </span>cap production puma:stop
+</code></pre>
+</div>
+
+<p>Supervising and monitoring Errbit is beyond the scope of this
+documentation.</p>
+
+<h3 id="rbenv-support">rbenv support</h3>
+
+<p>Pass <code class="highlighter-rouge">rbenv</code> environment when running <code class="highlighter-rouge">cap</code> to use rbenv. See
+<a href="https://github.com/capistrano/rbenv">capistrano/rbenv</a> for more
+information.</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nv">rbenv</span><span class="o">=</span>1 bundle <span class="nb">exec </span>cap production deploy
+</code></pre>
+</div>
+
+<h2 id="schedule-recurring-tasks">Schedule recurring tasks</h2>
+<p>You may want to periodically clear resolved errors to free up space.
+Schedule <code class="highlighter-rouge">rake errbit:db:clear_resolved</code> to run every day or so.</p>
+
+<h2 id="monit">Monit</h2>
+<p>If you like errbit to be monitored by monit, you’ll have to install and start monit
+with http support before deploying errbit.
+In order to enable http support you have to edit the monit config file which you can
+find in <code class="highlighter-rouge">/etc/monit/monitrc</code> for Ubuntu and set these lines:
+<code class="highlighter-rouge">
+set httpd port 2812 and
+   use address localhost  # only accept connection from localhost
+   allow localhost
+</code></p>
+
+<p>Next you have to add the following line to the Capfile:
+<code class="highlighter-rouge">
+require 'capistrano/puma/monit'
+</code></p>
+
+<p>And you have to deploy the monit config with the command:
+<code class="highlighter-rouge">bash
+bundle exec cap production puma:monit:config
+</code></p>
+
+<p>The configuration file (depending on the distro) will be generated at: <code class="highlighter-rouge">/etc/monit/conf.d/puma_errbit_production.conf</code></p>
+
+<h3 id="controlling-memory-usage-with-monit">Controlling memory usage with monit</h3>
+<p>If you like to limit memory usage for puma and restart it in case the usage gets
+over a 2GB limit, for example, you can add at the end of the monit config file the line
+<code class="highlighter-rouge">
+if totalmem is greater than 2048 MB for 3 cycles then restart
+</code></p>
+
+<p>The config file will look like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code># Monit configuration for Puma
+# Service name: puma_errbit_production
+#
+check process puma_errbit_production
+  with pidfile "/var/www/apps/errbit/shared/tmp/pids/puma.pid"
+  start program = "/usr/bin/sudo -u root /bin/bash -c 'cd /var/www/apps/errbit/current &amp;&amp; /usr/bin/env bundle exec puma -C /var/www/apps/errbit/shared/puma.rb --daemon'"
+  stop program = "/usr/bin/sudo -u root /bin/bash -c 'cd /var/www/apps/errbit/current &amp;&amp; /usr/bin/env bundle exec pumactl -S /var/www/apps/errbit/shared/tmp/pids/puma.state stop'"
+  if totalmem is greater than 2048 MB for 3 cycles then restart
+</code></pre>
+</div>

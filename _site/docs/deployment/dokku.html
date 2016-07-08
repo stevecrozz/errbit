@@ -1,0 +1,28 @@
+<h1 id="deploy-to-dokku">Deploy to Dokku</h1>
+
+<p>Deployment to Dokku is very similiar to Heroku.
+For more details see <a href="heroku.md">Heroku</a> guide.</p>
+
+<h2 id="create-an-app-on-dokku-and-push-the-source-code">Create an app on dokku and push the source code</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>dokku apps:create errbit
+dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
+dokku mongo:create errbit errbit
+dokku mongo:link errbit errbit
+dokku config:set errbit <span class="nv">HEROKU</span><span class="o">=</span>1
+dokku config:set errbit <span class="nv">GEMFILE_RUBY_VERSION</span><span class="o">=</span>2.2.4
+dokku config:set errbit <span class="nv">SECRET_KEY_BASE</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>bundle <span class="nb">exec </span>rake secret<span class="k">)</span><span class="s2">"</span>
+dokku config:set errbit <span class="nv">ERRBIT_HOST</span><span class="o">=</span>some-hostname.example.com
+dokku config:set errbit <span class="nv">ERRBIT_EMAIL_FROM</span><span class="o">=</span>example@example.com
+dokku config:set errbit <span class="nv">EMAIL_DELIVERY_METHOD</span><span class="o">=</span>smtp <span class="nv">SMTP_SERVER</span><span class="o">=</span>172.17.42.1
+
+git remote add dokku dokku@&lt;host&gt;:errbit
+git push dokku master
+</code></pre>
+</div>
+
+<h3 id="prepare-the-db">Prepare the DB</h3>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>dokku run errbit rake errbit:bootstrap
+</code></pre>
+</div>

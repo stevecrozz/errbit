@@ -1,0 +1,57 @@
+<h1 id="deploy-with-docker">Deploy with Docker</h1>
+
+<p>Errbit provides official <a href="https://www.docker.com/">Docker</a> images to
+make Docker deployment easy. You can pass all of <a href="configuration.html">Errbit’s
+configuration</a> to the Docker container using
+<code class="highlighter-rouge">docker run -e</code>.</p>
+
+<p>When running Errbit using <code class="highlighter-rouge">docker run</code> you must specify a MONGO_URL. If you’re
+running in a production environment, you should also specify
+RACK_ENV=production and SECRET_KEY_BASE=some-secret-key.</p>
+
+<p>If you don’t already have one, you can generate a suitable SECRET_KEY_BASE
+with:
+<code class="highlighter-rouge">bash
+docker run --rm errbit/errbit rake secret
+</code></p>
+
+<h2 id="standalone-errbit-app">Standalone Errbit App</h2>
+
+<p>Assuming you have a mongo host available, you can run errbit using <code class="highlighter-rouge">docker
+run</code>, exposing its HTTP interface on port 8080:
+<code class="highlighter-rouge">bash
+docker run \
+  -e "RACK_ENV=production" \
+  -e "MONGO_URL=mongodb://my-mongo-host" \
+  -e "SECRET_KEY_BASE=my$ecre7key123" \
+  -p 8080:8080 \
+  errbit/errbit:latest
+</code></p>
+
+<p>Now run <code class="highlighter-rouge">rake errbit:bootstrap</code> to bootstrap the Errbit db within an ephemeral
+Docker container:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>docker run <span class="se">\</span>
+  --rm <span class="se">\</span>
+  -e <span class="s2">"RACK_ENV=production"</span> <span class="se">\</span>
+  -e <span class="s2">"MONGO_URL=mongodb://my-mongo-host"</span> <span class="se">\</span>
+  errbit/errbit:latest <span class="se">\</span>
+  rake errbit:bootstrap
+</code></pre>
+</div>
+
+<h2 id="errbit--dependencies-via-docker-compose">Errbit + Dependencies via Docker Compose</h2>
+
+<p>Docker compose can take care of starting up a mongo container along with the
+Errbit application container and linking the two containers together:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>docker-compose up -e <span class="s2">"SECRET_KEY_BASE=my</span><span class="nv">$ecre7key123</span><span class="s2">"</span>
+</code></pre>
+</div>
+
+<p>Now run <code class="highlighter-rouge">rake errbit:bootstrap</code> to bootstrap the Errbit db within an ephemeral
+Docker container:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>docker <span class="nb">exec </span>errbit_errbit_1 rake errbit:bootstrap
+</code></pre>
+</div>
